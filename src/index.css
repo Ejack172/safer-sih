@@ -1,0 +1,353 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import 'leaflet/dist/leaflet.css';
+
+:root {
+  --bg-dark: #050b14;
+  --bg-panel: #0d1522;
+  --bg-panel-light: #162032;
+  
+  --border-color: #1e293b;
+  
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  
+  --accent-blue: #0ea5e9;
+  --accent-blue-hover: #0284c7;
+  --accent-primary: #1d4ed8; /* For the main Overview button */
+
+  --risk-low: #10b981;
+  --risk-moderate: #eab308;
+  --risk-high: #f97316;
+  --risk-critical: #ef4444;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+/* --- Layout Grid --- */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  padding: 12px;
+  gap: 12px;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px 0;
+}
+
+/* Main Content Area Grid */
+.main-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 340px; /* Map + Stats Area, Right Sidebar */
+  grid-template-rows: auto 1fr auto; /* Header, Main (Map+Sidebar), Bottom Panels */
+  gap: 12px;
+}
+
+.top-header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+/* The middle section containing stats, map, and right panels */
+.middle-section {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 12px;
+  height: 100%;
+  min-height: 0; /* Important for grid height constraints */
+}
+
+/* Left side of middle section (Stats + Map) */
+.map-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+/* Top Stats Row */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+.stat-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Map Container */
+.map-container {
+  flex: 1;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+  min-height: 0;
+}
+
+/* Right side of middle section (Nowcast + Alerts) */
+.right-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.nowcast-panel {
+  flex: 0 0 auto;
+}
+
+.alerts-panel {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Bottom Row */
+.bottom-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  height: 220px;
+}
+
+/* --- Specific Components Styling --- */
+
+/* Sidebar Navigation */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.nav-item:hover {
+  color: var(--text-main);
+  background: var(--bg-panel-light);
+}
+
+.nav-item.active {
+  background: var(--accent-primary);
+  color: white;
+  border-radius: 0 20px 20px 0;
+  margin-right: 16px;
+}
+
+/* Titles */
+.panel-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Values */
+.value-lg {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--accent-blue);
+}
+
+/* Timeline */
+.timeline-slider {
+  width: 100%;
+  -webkit-appearance: none;
+  background: transparent;
+}
+.timeline-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 2px;
+}
+.timeline-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  margin-top: -4px;
+  cursor: pointer;
+}
+
+/* Leaflet Customizations for Dark Theme Popup */
+.custom-popup .leaflet-popup-content-wrapper {
+  background: var(--bg-panel);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+}
+.custom-popup .leaflet-popup-tip {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+}
+.custom-popup .leaflet-popup-content {
+  margin: 12px;
+}
+
+/* Utility */
+.text-xs { font-size: 11px; }
+.text-sm { font-size: 13px; }
+.text-muted { color: var(--text-muted); }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 8px; }
+.gap-4 { gap: 16px; }
+.mb-2 { margin-bottom: 8px; }
+.mt-2 { margin-top: 8px; }
+/* Add this at the end of the file */
+
+@media (max-width: 1024px) {
+  body {
+    overflow: auto;
+  }
+
+  .app-layout {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    padding: 12px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .sidebar > div:first-child {
+    padding: 0;
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  .sidebar nav {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    width: 100%;
+    padding: 8px 0;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-item {
+    padding: 8px 16px;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+
+  .nav-item.active {
+    border-radius: 20px;
+    margin-right: 8px;
+  }
+
+  .sidebar > div:last-child {
+    display: none; /* Hide system status on small screens */
+  }
+
+  .main-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .top-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .top-header > div:last-child {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .middle-section {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .map-container {
+    min-height: 400px;
+  }
+
+  .bottom-row {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+  }
+
+  .bottom-row > div {
+    min-height: 250px;
+  }
+}
